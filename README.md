@@ -5,15 +5,18 @@ Este repositório contém os scripts de um pipeline de dados construído para ro
 ## 🏗️ Arquitetura e Tecnologias
 * **Ambiente:** Azure Databricks
 * **Linguagens:** Python (PySpark) e SQL Avançado
+* **Integrações:** Power Automate, SharePoint e Microsoft Teams (Adaptive Cards)
 * **Otimização:** Uso de recursos Delta Lake (MERGE, OPTIMIZE) e refatoração de Joins.
 
 ## 📁 Estrutura dos Arquivos
 
-1. **`00_orquestrador_pipeline.py`**: Notebook mestre em Python (PySpark) que simula a orquestração via Databricks Jobs, executando os notebooks SQL na sequência correta de dependência.
+1. **`00_orquestrador_pipeline.py`**: Notebook mestre em Python (PySpark) que simula a orquestração via Databricks Jobs, executando os notebooks SQL e de integração na sequência correta de dependência.
 2. **`01_ancoragem_workflow.sql`**: Script responsável por identificar analistas ativos/pausados e fazer a ancoragem inicial da carga de trabalho.
 3. **`02_view_refino.sql`**: Aplica regras de negócio específicas (como direcionamento de fluxos focais) e valida a necessidade de redistribuição de demandas.
 4. **`03_classificacao.sql`**: Consolida os dados com tabelas de domínio, calcula o tempo de SLA excluindo finais de semana e feriados (dias úteis) e finaliza atualizando a tabela Delta alvo, rodando o comando `OPTIMIZE` para performance de leitura.
+5. **`04_mensageiro_power_automate.py`**: Script de integração (PySpark) que converte a tabela Delta consolidada em um relatório Excel formatado em memória (Base64) e compila as métricas em um Adaptive Card para notificação via Microsoft Teams através de webhooks do Power Automate.
 
 ## 🚀 Destaques Técnicos
 * **Performance:** Substituição de `OR-JOINs` complexos por `UNION` para habilitar *Hash Joins* nativos da engine do Spark, reduzindo o tempo de processamento.
 * **Redução de Scans:** Refatoração de múltiplas CTEs para um *scan* único nas tabelas de histórico maiores.
+* **Integração de Sistemas:** Arquitetura de mensageria acoplada, conectando o processamento pesado do Databricks com o ecossistema Office 365 (Power Automate, SharePoint e Teams) via APIs REST.
